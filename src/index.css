@@ -1,0 +1,79 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 0 0% 7%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.5%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 88%;
+    --ring: 0 0% 7%;
+    --brand: 90 60% 45%;
+    --highlight-lime: 75 92% 76%;
+    --highlight-blue: 228 90% 86%;
+    --highlight-yellow: 52 100% 70%;
+    --highlight-orange: 28 100% 72%;
+    --highlight-purple: 262 85% 86%;
+    --highlight-pink: 330 85% 84%;
+    --highlight-green: 140 70% 78%;
+    --highlight-red: 6 90% 82%;
+    --grid-line: 0 0% 93%;
+    --grid-ref: 210 80% 55%;
+    --grid-margin: 340 80% 55%;
+    --laser: 0 100% 50%;
+    --radius: 0.5rem;
+    --shadow-paper: 0 1px 2px hsl(0 0% 0% / 0.04), 0 16px 48px -12px hsl(0 0% 0% / 0.14);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased font-sans;
+  }
+  h1, h2, h3 { letter-spacing: -0.035em; }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image:
+      linear-gradient(hsl(var(--grid-line)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid-line)) 1px, transparent 1px);
+    background-size: 72px 72px;
+  }
+  .bg-grid-ref {
+    background-image:
+      linear-gradient(hsl(var(--grid-ref) / 0.18) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--grid-ref) / 0.18) 1px, transparent 1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-"] { animation: none !important; }
+}
+
+.react-pdf__Page {
+  @apply bg-white shadow-lg;
+}
+
+.react-pdf__Page canvas {
+  @apply mx-auto;
+}
