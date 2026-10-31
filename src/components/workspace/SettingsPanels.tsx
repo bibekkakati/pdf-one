@@ -6,6 +6,7 @@ import ColorSwatches from '@/components/ColorSwatches';
 import UploadDropzone from '@/components/UploadDropzone';
 import ImageCropper from '@/components/ImageCropper';
 import { EditorElement } from '@/lib/editorElements';
+import type { SetOptions } from '@/hooks/useHistoryState';
 
 export const TOOLS = [
   { id: 'signature', label: 'Sign', icon: LucidePenLine },
@@ -46,7 +47,7 @@ const Hint = ({ children }: { children: string }) => <p className="text-xs text-
 interface ElementSettingsProps {
   element: EditorElement;
   onUpdate: (patch: Partial<EditorElement>) => void;
-  onTextChange: (patch: Partial<EditorElement>) => void;
+  onTextChange: (patch: Partial<EditorElement>, opts?: SetOptions) => void;
   onMaskColor: (color: string) => void;
   onRemove: () => void;
 }
@@ -82,12 +83,12 @@ export const ElementSettings = ({ element: el, onUpdate, onTextChange, onMaskCol
     {el.type === 'text' && (<>
       <div className="space-y-2.5">
         <FieldLabel>Text</FieldLabel>
-        <Textarea className="min-h-0 text-xs px-2 py-1.5" value={el.text} rows={2} autoFocus onChange={e => onTextChange({ text: e.target.value })} placeholder="Type here" />
+        <Textarea className="min-h-0 text-xs px-2 py-1.5" value={el.text} rows={2} autoFocus data-app-undo onChange={e => onTextChange({ text: e.target.value }, { mergeKey: `text:${el.id}` })} placeholder="Type here" />
         <p className="text-xs text-muted-foreground">Press Enter to start a new line.</p>
       </div>
       <div className="space-y-2.5">
         <div className="flex justify-between"><FieldLabel>Font size</FieldLabel><span className="text-xs text-muted-foreground">{el.fontSize}px</span></div>
-        <Slider min={6} max={72} step={1} value={[el.fontSize || 16]} onValueChange={v => onTextChange({ fontSize: v[0] })} />
+        <Slider min={6} max={72} step={1} value={[el.fontSize || 16]} onValueChange={v => onTextChange({ fontSize: v[0] }, { mergeKey: `fontSize:${el.id}` })} />
       </div>
       <div className="space-y-2.5">
         <FieldLabel>Style</FieldLabel>

@@ -7,6 +7,7 @@ import { PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react';
 import { EditorElement, KEEP_ASPECT, TEXT_LINE_HEIGHT } from '@/lib/editorElements';
 import { INITIAL_PDF_SCALE } from '@/lib/downloadState';
 import type { PageEntry } from '@/lib/pageModel';
+import type { SetOptions } from '@/hooks/useHistoryState';
 import ElementOverlay from '@/components/viewer/ElementOverlay';
 import PageControls from '@/components/viewer/PageControls';
 import PageSurface, { PageSkeleton, toLocal } from '@/components/viewer/PageSurface';
@@ -50,7 +51,7 @@ interface PDFViewerProps {
   elements: EditorElement[];
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  onChange: (id: string, patch: Partial<EditorElement>) => void;
+  onChange: (id: string, patch: Partial<EditorElement>, opts?: SetOptions) => void;
   onDelete: (id: string) => void;
   onRestorePage: (id: string) => void;
   showGrid: boolean;
@@ -58,7 +59,9 @@ interface PDFViewerProps {
   onStroke: (points: [number, number][]) => void;
 }
 
-type Gesture = { id: string; mode: 'move' | 'resize'; startX: number; startY: number; orig: EditorElement; moved: boolean };
+// `key` is unique per pointer-down so one whole drag/resize becomes a single undo step
+type Gesture = { id: string; key: string; mode: 'move' | 'resize'; startX: number; startY: number; orig: EditorElement; moved: boolean };
+let gestureCount = 0;
 
 const PDFViewer = ({ file, pages, currentIndex, onIndexChange, elements, selectedId, onSelect, onChange, onDelete, onRestorePage, showGrid, draw, onStroke }: PDFViewerProps) => {
   const numPages = pages.length;
@@ -98,7 +101,7 @@ const PDFViewer = ({ file, pages, currentIndex, onIndexChange, elements, selecte
     e.stopPropagation();
     if (mode === 'resize') e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
-    gesture.current = { id: el.id, mode, startX: e.clientX, startY: e.clientY, orig: el, moved: false };
+    gesture.current = { id: el.id, key: `gesture:${++gestureCount}`, mode, startX: e.clientX, startY: e.clientY, orig: el, moved: false };
     onSelect(el.id);
   };
   const move = (e: React.PointerEvent<HTMLElement>) => {
@@ -110,14 +113,15 @@ const PDFViewer = ({ file, pages, currentIndex, onIndexChange, elements, selecte
     if (!g.moved) return;
     const pw = entry.w, ph = entry.h;
     const o = g.orig;
+    const step: SetOptions = { mergeKey: g.key, mergeMs: Infinity };
     if (g.mode === 'move') {
-      onChange(g.id, { x: Math.max(0, Math.min(o.x + dx, pw - o.w)), y: Math.max(0, Math.min(o.y + dy, ph - o.h)) });
+      onChange(g.id, { x: Math.max(0, Math.min(o.x + dx, pw - o.w)), y: Math.max(0, Math.min(o.y + dy, ph - o.h)) }, step);
     } else {
       const minW = 16, minH = o.type === 'text' ? (o.fontSize || 16) * TEXT_LINE_HEIGHT : 10;
       let w = Math.max(minW, Math.min(o.w + dx, pw - o.x));
       let h = KEEP_ASPECT[o.type] ? w * (o.h / o.w) : Math.max(minH, Math.min(o.h + dy, ph - o.y));
       if (KEEP_ASPECT[o.type] && o.y + h > ph) { h = ph - o.y; w = h * (o.w / o.h); }
-      onChange(g.id, { w, h });
+      onChange(g.id, { w, h }, step);
     }
   };
   const end = () => { gesture.current = null; };

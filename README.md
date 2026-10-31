@@ -32,18 +32,18 @@
 
 ## ✨ Features
 
-| Feature                 | Description                                                                                                                                            |
-| :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **✍️ Sign**             | Draw, type with realistic handwriting fonts, or upload signature images with built-in crop, background removal, and sharpening filters.                |
-| **📝 Text**             | Add custom text boxes with complete control over font size, color, bold, italic, and underline styling.                                                |
-| **🖍️ Highlight**        | Mark passages with an authentic, translucent highlighter stroke.                                                                                       |
-| **✏️ Draw**             | Freehand sketching and annotations with customizable brush colors and stroke widths.                                                                   |
-| **⬛ Box & Redact**     | Cover sensitive information or content with resizable solid-color shapes.                                                                              |
-| **🖼️ Image**            | Insert external images with built-in cropping, scaling, and repositioning tools.                                                                       |
-| **📄 Page Management**  | Insert blank pages, reorder existing pages, or delete pages non-destructively; changes apply on download.                                              |
-| **🔐 Protect**          | Set, modify, or strip PDF passwords, plus securely decrypt password-protected files client-side.                                                       |
-| **🔍 Viewing Tools**    | Virtualized single-page rendering for large files, lazy-loaded thumbnails, zoom controls, layout grid/margin guides, and a presentation laser pointer. |
-| **⚡ Editing Workflow** | Global undo/redo history, editable document naming, and leave confirmation prompts to protect unsaved work.                                            |
+| Feature             | Description                                                                                                                             |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| **✍️ Sign**         | Draw, type with realistic handwriting fonts, or upload signature images with built-in crop, background removal, and sharpening filters. |
+| **📝 Text**         | Add custom text boxes with complete control over font size, color, bold, italic, and underline styling.                                 |
+| **🖍️ Highlight**    | Mark passages with an authentic, translucent highlighter stroke.                                                                        |
+| **✏️ Draw**         | Freehand sketching and annotations with customizable brush colors and stroke widths.                                                    |
+| **⬛ Box & Redact** | Cover sensitive information or content with resizable solid-color shapes.                                                               |
+| **🖼️ Image**        | Insert external images with built-in cropping, scaling, and repositioning tools.                                                        |
+| **📄 Pages**        | Insert blank pages, reorder existing pages, or delete pages non-destructively; changes apply on download.                               |
+| **🔐 Protect**      | Set, modify, or strip PDF passwords, plus securely decrypt password-protected files client-side.                                        |
+| **🔍 Tools**        | Zoom controls, layout grid/margin guides, and a presentation laser pointer.                                                             |
+| **⚡ Workflow**     | Global undo/redo history, editable document naming, and leave confirmation prompts to protect unsaved work.                             |
 
 ---
 

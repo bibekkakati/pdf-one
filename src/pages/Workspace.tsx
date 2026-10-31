@@ -19,7 +19,7 @@ import {
     ToolId,
     ToolSettings,
 } from "@/components/workspace/SettingsPanels";
-import { useHistoryState } from "@/hooks/useHistoryState";
+import { SetOptions, useHistoryState } from "@/hooks/useHistoryState";
 import { hasUndownloadedEdits } from "@/lib/downloadState";
 import {
     EditorElement,
@@ -65,8 +65,10 @@ const Workspace = () => {
         pages: PageEntry[];
     }>({ elements: [], pages: [] });
     const { elements, pages } = history.value;
-    const setElements = (fn: (prev: EditorElement[]) => EditorElement[]) =>
-        history.set((d) => ({ ...d, elements: fn(d.elements) }));
+    const setElements = (
+        fn: (prev: EditorElement[]) => EditorElement[],
+        opts?: SetOptions,
+    ) => history.set((d) => ({ ...d, elements: fn(d.elements) }), opts);
     const setPages = (fn: (prev: PageEntry[]) => PageEntry[]) =>
         history.set((d) => ({ ...d, pages: fn(d.pages) }));
     const [password, setPassword] = useState<string | null>(null);
@@ -123,12 +125,15 @@ const Workspace = () => {
             setCurrentIndex(pages.length - 1);
     }, [pages.length, currentIndex]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const undo = () => {
-        if (history.undo()) setSelectedId(null);
+    // Keep the selection across undo/redo while the element still exists
+    const keepSelection = (doc: { elements: EditorElement[] } | null) => {
+        if (doc)
+            setSelectedId((id) =>
+                id && doc.elements.some((e) => e.id === id) ? id : null,
+            );
     };
-    const redo = () => {
-        if (history.redo()) setSelectedId(null);
-    };
+    const undo = () => keepSelection(history.undo());
+    const redo = () => keepSelection(history.redo());
     const [tool, setTool] = useState<ToolId>("signature");
     const [maskColor, setMaskColor] = useState("#ffffff");
     const [panelOpen, setPanelOpen] = useState(true);
@@ -204,9 +209,14 @@ const Workspace = () => {
         ).catch(() => {});
     }, [pdfFile]);
 
-    const update = (id: string, patch: Partial<EditorElement>) =>
-        setElements((prev) =>
-            prev.map((e) => (e.id === id ? { ...e, ...patch } : e)),
+    const update = (
+        id: string,
+        patch: Partial<EditorElement>,
+        opts?: SetOptions,
+    ) =>
+        setElements(
+            (prev) => prev.map((e) => (e.id === id ? { ...e, ...patch } : e)),
+            opts,
         );
     const deleteElement = (id: string) => {
         setElements((prev) => prev.filter((e) => e.id !== id));
@@ -226,9 +236,16 @@ const Workspace = () => {
                 return;
             }
             const t = e.target as HTMLElement;
-            if (t.tagName === "INPUT" || t.tagName === "TEXTAREA") return;
             const key = e.key.toLowerCase();
-            if ((e.metaKey || e.ctrlKey) && (key === "z" || key === "y")) {
+            const isHistoryKey =
+                (e.metaKey || e.ctrlKey) && (key === "z" || key === "y");
+            // Text fields keep native editing, except element text fields opted into app undo
+            if (
+                (t.tagName === "INPUT" || t.tagName === "TEXTAREA") &&
+                !(isHistoryKey && t.hasAttribute("data-app-undo"))
+            )
+                return;
+            if (isHistoryKey) {
                 e.preventDefault();
                 if (key === "y" || e.shiftKey) redo();
                 else undo();
@@ -413,17 +430,25 @@ const Workspace = () => {
         setSelectedId(null);
     };
 
-    const setText = (el: EditorElement, patch: Partial<EditorElement>) => {
+    const setText = (
+        el: EditorElement,
+        patch: Partial<EditorElement>,
+        opts?: SetOptions,
+    ) => {
         const next = { ...el, ...patch };
-        update(el.id, {
-            ...patch,
-            ...measureText(
-                next.text || "",
-                next.fontSize || 16,
-                next.bold,
-                next.italic,
-            ),
-        });
+        update(
+            el.id,
+            {
+                ...patch,
+                ...measureText(
+                    next.text || "",
+                    next.fontSize || 16,
+                    next.bold,
+                    next.italic,
+                ),
+            },
+            opts,
+        );
     };
 
     const handleDownload = async () => {
@@ -592,7 +617,7 @@ const Workspace = () => {
                     </Button>
                     <Button size="sm" onClick={handleDownload}>
                         <LucideDownload className="w-4 h-4 mr-2" />
-                        {hasChanges ? "Download edited PDF" : "Download PDF"}
+                        Download PDF
                         {hasPendingEdits && (
                             <span
                                 className="ml-1 h-2 w-2 rounded-full bg-highlight-lime"
@@ -712,8 +737,8 @@ const Workspace = () => {
                                         onUpdate={(patch) =>
                                             update(selected.id, patch)
                                         }
-                                        onTextChange={(patch) =>
-                                            setText(selected, patch)
+                                        onTextChange={(patch, opts) =>
+                                            setText(selected, patch, opts)
                                         }
                                         onMaskColor={setMaskColor}
                                         onRemove={() =>
